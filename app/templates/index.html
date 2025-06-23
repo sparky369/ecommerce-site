@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Home - E-Commerce Site{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white p-5 rounded mb-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Welcome to Our Store</h1>
+                <p class="lead">Discover amazing products at unbeatable prices. Quality guaranteed, fast shipping!</p>
+                <a class="btn btn-light btn-lg" href="{{ url_for('main.products') }}">
+                    <i class="fas fa-shopping-bag"></i> Shop Now
+                </a>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-store fa-5x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Categories -->
+{% if categories %}
+<section class="mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-th-large"></i> Shop by Category
+            </h2>
+            <div class="row">
+                {% for category in categories %}
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <div class="card text-center h-100 shadow-sm">
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {% if category.name == 'Electronics' %}
+                                    <i class="fas fa-laptop fa-3x text-primary"></i>
+                                {% elif category.name == 'Clothing' %}
+                                    <i class="fas fa-tshirt fa-3x text-success"></i>
+                                {% elif category.name == 'Books' %}
+                                    <i class="fas fa-book fa-3x text-info"></i>
+                                {% elif category.name == 'Home & Garden' %}
+                                    <i class="fas fa-home fa-3x text-warning"></i>
+                                {% else %}
+                                    <i class="fas fa-box fa-3x text-secondary"></i>
+                                {% endif %}
+                            </div>
+                            <h5 class="card-title">{{ category.name }}</h5>
+                            <p class="card-text">{{ category.description }}</p>
+                            <a href="{{ url_for('main.products', category=category.id) }}" class="btn btn-outline-primary">
+                                Browse {{ category.name }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Featured Products -->
+<section class="mb-5">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-star"></i> Featured Products
+            </h2>
+            {% if products %}
+                <div class="row">
+                    {% for product in products %}
+                    <div class="col-lg-3 col-md-6 mb-4">
+                        <div class="card h-100 shadow-sm">
+                            {% if product.image_url %}
+                                <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-image fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text flex-grow-1">
+                                    {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                                </p>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="h5 mb-0 text-primary fw-bold">${{ "%.2f"|format(product.price) }}</span>
+                                        {% if product.average_rating > 0 %}
+                                            <small class="text-muted">
+                                                {% for i in range(1, 6) %}
+                                                    {% if i <= product.average_rating %}
+                                                        <i class="fas fa-star text-warning"></i>
+                                                    {% else %}
+                                                        <i class="far fa-star text-muted"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </small>
+                                        {% endif %}
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <a href="{{ url_for('main.product_detail', id=product.id) }}" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-eye"></i> View Details
+                                        </a>
+                                        {% if current_user.is_authenticated and product.stock_quantity > 0 %}
+                                            <a href="{{ url_for('shop.add_to_cart', product_id=product.id) }}" class="btn btn-success btn-sm">
+                                                <i class="fas fa-cart-plus"></i> Add to Cart
+                                            </a>
+                                        {% elif product.stock_quantity == 0 %}
+                                            <button class="btn btn-secondary btn-sm" disabled>
+                                                <i class="fas fa-times"></i> Out of Stock
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="text-center mt-4">
+                    <a href="{{ url_for('main.products') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-th"></i> View All Products
+                    </a>
+                </div>
+            {% else %}
+                <div class="text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-box-open fa-5x text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">No Products Available</h4>
+                    <p class="lead text-muted">Please check back later or contact support.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="row bg-light rounded p-4">
+        <div class="col-md-4 text-center mb-4">
+            <div class="mb-3">
+                <i class="fas fa-shipping-fast fa-4x text-primary"></i>
+            </div>
+            <h4>Fast Shipping</h4>
+            <p class="text-muted">Quick and reliable delivery to your doorstep.</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="mb-3">
+                <i class="fas fa-shield-alt fa-4x text-success"></i>
+            </div>
+            <h4>Secure Shopping</h4>
+            <p class="text-muted">Your personal information is safe and secure.</p>
+        </div>
+        <div class="col-md-4 text-center mb-4">
+            <div class="mb-3">
+                <i class="fas fa-headset fa-4x text-info"></i>
+            </div>
+            <h4>24/7 Support</h4>
+            <p class="text-muted">Customer support available round the clock.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

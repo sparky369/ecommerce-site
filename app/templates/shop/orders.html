@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Order History</h2>
+
+{% if orders %}
+    {% for order in orders %}
+        <div class="card mb-3">
+            <div class="card-header d-flex justify-content-between">
+                <h5>Order #{{ order.id }}</h5>
+                <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' }}">{{ order.status.title() }}</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Order Date:</strong> {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                        <p><strong>Total Amount:</strong> ${{ "%.2f"|format(order.total_amount) }}</p>
+                        <p><strong>Shipping Address:</strong> {{ order.shipping_address }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Items:</h6>
+                        <ul class="list-unstyled">
+                            {% for item in order.order_items %}
+                                <li>{{ item.product.name }} - Qty: {{ item.quantity }} - ${{ "%.2f"|format(item.price) }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="text-center">
+        <h4>No orders found</h4>
+        <p>You haven't placed any orders yet.</p>
+        <a href="{{ url_for('main.products') }}" class="btn btn-primary">Start Shopping</a>
+    </div>
+{% endif %}
+{% endblock %}
