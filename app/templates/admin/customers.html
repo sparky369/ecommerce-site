@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Customers - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-users"></i> Customer Management</h1>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>All Customers ({{ customers.total }} total)</h5>
+    </div>
+    <div class="card-body">
+        {% if customers.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Orders</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers.items %}
+                        <tr>
+                            <td><strong>{{ customer.id }}</strong></td>
+                            <td>{{ customer.get_full_name() }}</td>
+                            <td>{{ customer.email }}</td>
+                            <td>{{ customer.phone or 'N/A' }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ customer.orders|length }}</span>
+                            </td>
+                            <td>{{ customer.created_at.strftime('%Y-%m-%d') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if customers.pages > 1 %}
+            <nav aria-label="Customers pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if customers.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.customers', page=customers.prev_num) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in customers.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != customers.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.customers', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if customers.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.customers', page=customers.next_num) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-user-friends fa-5x text-muted mb-3"></i>
+                <h4>No Customers Found</h4>
+                <p class="text-muted">No customers have registered yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

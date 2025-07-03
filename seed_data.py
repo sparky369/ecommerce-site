@@ -112,19 +112,26 @@ def create_sample_data():
             print(f"Created {len(products)} products successfully!")
             
             # Create admin user
-            print("Creating admin user...")
-            admin = User(
-                username='admin',
-                email='admin@example.com',
-                first_name='Admin',
-                last_name='User',
-                address='123 Admin Street, Admin City, AC 12345',
-                phone='555-0123',
-                is_admin=True
-            )
-            admin.set_password('admin123')
-            db.session.add(admin)
+            # First Ensure/Check admin user exists and has correct credentials
+    		admin = User.query.filter_by(username='admin').first()
+    		if admin:
+        		admin.set_password('admin123')
+        		admin.is_admin = True
+        		print('Admin user updated')
+    		else:
+    			print("Creating admin user...")
+        		admin = User(
+            		username='admin',
+            		email='admin@example.com',
+            		first_name='Admin',
+            		last_name='User',
+            		is_admin=True
+        		)
+        		admin.set_password('admin123')
+        		db.session.add(admin)
+        		print('Admin user created')
             
+                        
             # Create sample customer
             print("Creating sample customer...")
             customer = User(

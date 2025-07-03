@@ -7,19 +7,49 @@
 <div class="hero-section bg-primary text-white p-5 rounded mb-5">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-lg-6">
+            <div class="col-lg-8">
                 <h1 class="display-4 fw-bold">Welcome to Our Store</h1>
                 <p class="lead">Discover amazing products at unbeatable prices. Quality guaranteed, fast shipping!</p>
-                <a class="btn btn-light btn-lg" href="{{ url_for('main.products') }}">
-                    <i class="fas fa-shopping-bag"></i> Shop Now
-                </a>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a class="btn btn-light btn-lg" href="{{ url_for('main.products') }}">
+                        <i class="fas fa-shopping-bag"></i> Shop Now
+                    </a>
+                    {% if not current_user.is_authenticated %}
+                        <a class="btn btn-outline-light btn-lg" href="{{ url_for('auth.admin_login') }}">
+                            <i class="fas fa-user-shield"></i> Admin Login
+                        </a>
+                    {% elif current_user.is_administrator() %}
+                        <a class="btn btn-outline-light btn-lg" href="{{ url_for('admin.dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Admin Dashboard
+                        </a>
+                    {% endif %}
+                </div>
             </div>
-            <div class="col-lg-6 text-center">
+            <div class="col-lg-4 text-center">
                 <i class="fas fa-store fa-5x opacity-75"></i>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Admin Quick Access (for logged in admins) -->
+{% if current_user.is_authenticated and current_user.is_administrator() %}
+<div class="alert alert-info mb-4">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h5 class="mb-0">
+                <i class="fas fa-user-shield"></i> Welcome back, Administrator!
+            </h5>
+            <p class="mb-0">Manage your store from the admin dashboard.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">
+                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Featured Categories -->
 {% if categories %}
@@ -105,7 +135,7 @@
                                         <a href="{{ url_for('main.product_detail', id=product.id) }}" class="btn btn-primary btn-sm">
                                             <i class="fas fa-eye"></i> View Details
                                         </a>
-                                        {% if current_user.is_authenticated and product.stock_quantity > 0 %}
+                                        {% if current_user.is_authenticated and product.stock_quantity > 0 and not current_user.is_administrator() %}
                                             <a href="{{ url_for('shop.add_to_cart', product_id=product.id) }}" class="btn btn-success btn-sm">
                                                 <i class="fas fa-cart-plus"></i> Add to Cart
                                             </a>

@@ -4,7 +4,7 @@ from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import Numeric
 
-# User Model
+# User Model (Updated with admin methods)
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
@@ -29,8 +29,14 @@ class User(UserMixin, db.Model):
     
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def is_administrator(self):
+        return self.is_admin
+    
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
 
-# Product Model
+# Product Model (No changes)
 class Product(db.Model):
     __tablename__ = 'products'
     
@@ -54,7 +60,7 @@ class Product(db.Model):
             return sum(review.rating for review in self.reviews) / len(self.reviews)
         return 0
 
-# Category Model
+# Category Model (No changes)
 class Category(db.Model):
     __tablename__ = 'categories'
     
@@ -65,7 +71,7 @@ class Category(db.Model):
     # Relationships
     products = db.relationship('Product', backref='category', lazy=True)
 
-# Order Model
+# Order Model (Updated with status management)
 class Order(db.Model):
     __tablename__ = 'orders'
     
@@ -75,11 +81,34 @@ class Order(db.Model):
     status = db.Column(db.String(20), default='pending')
     shipping_address = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
     order_items = db.relationship('OrderItem', backref='order', lazy=True)
+    
+    def get_status_display(self):
+        status_map = {
+            'pending': 'Pending',
+            'shipped': 'Shipped',
+            'delivered': 'Delivered',
+            'cancelled': 'Cancelled'
+        }
+        return status_map.get(self.status, self.status.title())
+    
+    def get_status_badge_class(self):
+        status_classes = {
+            'pending': 'warning',
+            'shipped': 'info',
+            'delivered': 'success',
+            'cancelled': 'danger'
+        }
+        return status_classes.get(self.status, 'secondary')
+    
+    def update_status(self, new_status):
+        self.status = new_status
+        self.updated_at = datetime.utcnow()
 
-# OrderItem Model
+# OrderItem Model (No changes)
 class OrderItem(db.Model):
     __tablename__ = 'order_items'
     
@@ -89,7 +118,7 @@ class OrderItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(Numeric(10, 2), nullable=False)
 
-# Cart Model
+# Cart Model (No changes)
 class CartItem(db.Model):
     __tablename__ = 'cart_items'
     
@@ -99,7 +128,7 @@ class CartItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     added_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Review Model
+# Review Model (No changes)
 class Review(db.Model):
     __tablename__ = 'reviews'
     

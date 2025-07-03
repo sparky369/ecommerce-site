@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Products - Admin{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="fas fa-box"></i> Product Management</h1>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5>All Products ({{ products.total }} total)</h5>
+    </div>
+    <div class="card-body">
+        {% if products.items %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Product</th>
+                            <th>Category</th>
+                            <th>Price</th>
+                            <th>Stock</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products.items %}
+                        <tr>
+                            <td><strong>{{ product.id }}</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if product.image_url %}
+                                        <img src="{{ product.image_url }}" alt="{{ product.name }}" 
+                                             style="width: 40px; height: 40px; object-fit: cover;" class="rounded me-2">
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ product.name }}</strong><br>
+                                        <small class="text-muted">{{ product.description[:50] }}...</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ product.category.name if product.category else 'N/A' }}</td>
+                            <td><strong>${{ "%.2f"|format(product.price) }}</strong></td>
+                            <td>
+                                {% if product.stock_quantity > 10 %}
+                                    <span class="badge bg-success">{{ product.stock_quantity }}</span>
+                                {% elif product.stock_quantity > 0 %}
+                                    <span class="badge bg-warning">{{ product.stock_quantity }}</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if product.stock_quantity > 0 %}
+                                    <span class="badge bg-success">Available</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if products.pages > 1 %}
+            <nav aria-label="Products pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.products', page=products.prev_num) }}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in products.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != products.page %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.products', page=page_num) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.products', page=products.next_num) }}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-box-open fa-5x text-muted mb-3"></i>
+                <h4>No Products Found</h4>
+                <p class="text-muted">No products have been added yet.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

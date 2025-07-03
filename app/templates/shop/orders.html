@@ -1,39 +1,87 @@
 {% extends "base.html" %}
 
+{% block title %}My Orders - E-Commerce Site{% endblock %}
+
 {% block content %}
-<h2>Order History</h2>
+<h2><i class="fas fa-list"></i> My Order History</h2>
 
 {% if orders %}
     {% for order in orders %}
-        <div class="card mb-3">
-            <div class="card-header d-flex justify-content-between">
-                <h5>Order #{{ order.id }}</h5>
-                <span class="badge bg-{{ 'success' if order.status == 'completed' else 'warning' }}">{{ order.status.title() }}</span>
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5 class="mb-0">Order #{{ order.id }}</h5>
+                        <small class="text-muted">Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <span class="badge bg-{{ order.get_status_badge_class() }} fs-6">
+                            {{ order.get_status_display() }}
+                        </span>
+                        {% if order.status == 'shipped' %}
+                            <br><small class="text-muted">Updated: {{ order.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-6">
-                        <p><strong>Order Date:</strong> {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') }}</p>
-                        <p><strong>Total Amount:</strong> ${{ "%.2f"|format(order.total_amount) }}</p>
-                        <p><strong>Shipping Address:</strong> {{ order.shipping_address }}</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Items:</h6>
+                    <div class="col-md-8">
+                        <h6>Items Ordered:</h6>
                         <ul class="list-unstyled">
                             {% for item in order.order_items %}
-                                <li>{{ item.product.name }} - Qty: {{ item.quantity }} - ${{ "%.2f"|format(item.price) }}</li>
+                                <li class="mb-2">
+                                    <div class="d-flex align-items-center">
+                                        {% if item.product.image_url %}
+                                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" 
+                                                 style="width: 50px; height: 50px; object-fit: cover;" class="rounded me-3">
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <strong>{{ item.product.name }}</strong><br>
+                                            <small class="text-muted">Quantity: {{ item.quantity }} × ${{ "%.2f"|format(item.price) }} = ${{ "%.2f"|format(item.quantity * item.price) }}</small>
+                                        </div>
+                                    </div>
+                                </li>
                             {% endfor %}
                         </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="bg-light p-3 rounded">
+                            <h6>Order Summary</h6>
+                            <p class="mb-1"><strong>Total Amount: ${{ "%.2f"|format(order.total_amount) }}</strong></p>
+                            <p class="mb-1"><small><strong>Status:</strong> {{ order.get_status_display() }}</small></p>
+                            {% if order.status == 'pending' %}
+                                <small class="text-warning">
+                                    <i class="fas fa-clock"></i> Your order is being prepared
+                                </small>
+                            {% elif order.status == 'shipped' %}
+                                <small class="text-info">
+                                    <i class="fas fa-shipping-fast"></i> Your order has been shipped!
+                                </small>
+                            {% elif order.status == 'delivered' %}
+                                <small class="text-success">
+                                    <i class="fas fa-check-circle"></i> Order delivered successfully
+                                </small>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mt-3">
+                            <h6>Shipping Address:</h6>
+                            <small class="text-muted">{{ order.shipping_address }}</small>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     {% endfor %}
 {% else %}
-    <div class="text-center">
-        <h4>No orders found</h4>
-        <p>You haven't placed any orders yet.</p>
-        <a href="{{ url_for('main.products') }}" class="btn btn-primary">Start Shopping</a>
+    <div class="text-center py-5">
+        <i class="fas fa-shopping-bag fa-5x text-muted mb-3"></i>
+        <h4>No Orders Found</h4>
+        <p class="text-muted">You haven't placed any orders yet.</p>
+        <a href="{{ url_for('main.products') }}" class="btn btn-primary">
+            <i class="fas fa-shopping-cart"></i> Start Shopping
+        </a>
     </div>
 {% endif %}
 {% endblock %}
